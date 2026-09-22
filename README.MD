@@ -131,8 +131,8 @@ the local `.env` values.
 Backend on Render:
 
 ```env
-FRONTEND_URL=https://cine-book-steel.vercel.app
-GOOGLE_CALLBACK_URL=https://cinebook-i8er.onrender.com/api/auth/callback/google
+FRONTEND_URL=https://cine-book.vercel.app
+GOOGLE_CALLBACK_URL=https://cinebook.onrender.com/api/auth/callback/google
 ```
 
 Frontend on Vercel:

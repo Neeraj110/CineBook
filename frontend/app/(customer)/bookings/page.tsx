@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store/useAuthStore";
 import { useMyBookings, useCancelBooking, Booking } from "@/lib/api/bookings";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +15,21 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 
 export default function MyBookingsPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   const { data: bookings, isLoading } = useMyBookings();
   const cancelMutation = useCancelBooking();
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace("/login?redirect=/bookings");
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  if (authLoading || !isAuthenticated) {
+    return <div className="py-20 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
 
   if (isLoading) {
     return <div className="py-20 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;

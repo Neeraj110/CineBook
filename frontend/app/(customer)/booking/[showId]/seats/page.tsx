@@ -18,7 +18,7 @@ const SOCKET_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 export default function SeatSelectionPage({ params }: { params: Promise<{ showId: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
 
   const { data: show, isLoading: showLoading, refetch: refetchShow } = useShow(resolvedParams.showId);
   const seats = show?.seats ?? [];
@@ -90,6 +90,8 @@ export default function SeatSelectionPage({ params }: { params: Promise<{ showId
   };
 
   const handleBook = async () => {
+    if (authLoading) return;
+
     if (!isAuthenticated) {
       router.push(`/login?redirect=/booking/${resolvedParams.showId}/seats`);
       return;
@@ -263,7 +265,7 @@ export default function SeatSelectionPage({ params }: { params: Promise<{ showId
           <Button
             size="lg"
             className="w-full sm:w-auto rounded-full px-8"
-            disabled={selectedSeatIds.size === 0 || isSubmitting}
+            disabled={selectedSeatIds.size === 0 || isSubmitting || authLoading}
             onClick={handleBook}
           >
             {isSubmitting ? <Loader2 className="animate-spin h-5 w-5" /> : "Proceed to Checkout"}

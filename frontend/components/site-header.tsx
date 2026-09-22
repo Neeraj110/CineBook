@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { fetchClient } from "@/lib/api/client";
 import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { cn } from "@/lib/utils";
-import { Search, Bell, MapPin, ChevronDown, MonitorPlay } from "lucide-react";
+import { Search, Bell, MapPin, ChevronDown, MonitorPlay, LogOut, Ticket } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const NAV_LINKS = [
@@ -21,13 +22,18 @@ const FORMAT_FILTERS = ["IMAX", "DOLBY", "4DX", "PRIME"];
 export function SiteHeader() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      await fetchClient("/auth/logout", { method: "POST" });
-    } finally {
+      await fetchClient("/auth/logout", { method: "POST" })
       logout();
+      router.replace("/login");
+    } finally {
+      setIsAccountDialogOpen(false);
+      router.replace("/login");
     }
   };
 
@@ -47,7 +53,7 @@ export function SiteHeader() {
           : "bg-background"
       )}
     >
-      <div className="mx-auto px-4 sm:px-6 h-14 flex items-center gap-3 overflow-hidden">
+      <div className="mx-auto px-4 sm:px-6 h-14 flex items-center gap-3 overflow-visible">
 
         {/* ── Left: Logo + Location ── */}
         <div className="flex items-center gap-3 shrink-0">
@@ -126,15 +132,19 @@ export function SiteHeader() {
               </button>
 
               {/* Avatar */}
-              <button
-                onClick={handleLogout}
-                className="h-9 w-9 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center hover:border-primary transition-colors shrink-0"
-                title={`Signed in as ${user.name} — click to sign out`}
-              >
-                <span className="text-xs font-bold text-primary">
-                  {user.name?.charAt(0).toUpperCase()}
-                </span>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setIsAccountDialogOpen(true)}
+                  className="h-9 w-9 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center hover:border-primary transition-colors shrink-0"
+                  title={`Account menu for ${user.name}`}
+                  aria-haspopup="dialog"
+                >
+                  <span className="text-xs font-bold text-primary">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </span>
+                </button>
+
+              </div>
             </>
           ) : (
             <div className="flex items-center gap-2 shrink-0">
@@ -152,6 +162,31 @@ export function SiteHeader() {
           )}
         </div>
       </div>
+      {user && (
+        <Dialog open={isAccountDialogOpen} onOpenChange={setIsAccountDialogOpen}>
+          <DialogContent className="max-w-xs">
+            <DialogHeader>
+              <DialogTitle>{user.name}</DialogTitle>
+              <DialogDescription>{user.email}</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/bookings"
+                onClick={() => setIsAccountDialogOpen(false)}
+                className="flex items-center gap-3 rounded-md border border-border px-4 py-3 text-sm hover:bg-surface-elevated"
+              >
+                <Ticket className="h-4 w-4" /> My Bookings
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 rounded-md border border-border px-4 py-3 text-left text-sm text-status-failed hover:bg-surface-elevated"
+              >
+                <LogOut className="h-4 w-4" /> Log out
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </header>
   );
 }

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchClient } from "./client";
+import { useAuthStore } from "../store/useAuthStore";
 
 export interface BookingSeat {
   id: number;
@@ -42,12 +43,15 @@ export function useBooking(bookingId?: string) {
 }
 
 export function useMyBookings() {
+  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
+
   return useQuery({
     queryKey: ["my-bookings"],
     queryFn: async (): Promise<Booking[]> => {
       const data = await fetchClient(`/bookings/mine`);
       return data.bookings || [];
-    }
+    },
+    enabled: !authLoading && isAuthenticated,
   });
 }
 
@@ -93,14 +97,17 @@ export function useCancelBooking() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (bookingId: number) => {
-      const data = await fetchClient(`/bookings/${bookingId}/cancel`, { method: "PATCH" });
+      const data = await fetchClient(`/bookings/${bookingId}/cancel`, {
+        method: "PATCH",
+      });
       return data.booking;
     },
     onSuccess: (data, bookingId) => {
       queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["booking", bookingId.toString()] });
+      queryClient.invalidateQueries({
+        queryKey: ["booking", bookingId.toString()],
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
-    }
+    },
   });
 }
-

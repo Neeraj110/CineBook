@@ -1,0 +1,216 @@
+@import url("https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&family=Google+Sans+Code:ital,wght,MONO@0,300..800,1;1,300..800,1&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* === FONTS === */
+  --font-sans: "Google Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Elms Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Google Sans Code", ui-monospace, monospace;
+
+  /* === COLOR TOKENS (mapped to CSS vars) === */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-glow: var(--primary-glow);
+
+  --color-gold: var(--gold);
+  --color-gold-dim: var(--gold-dim);
+
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-foreground: var(--surface-foreground);
+
+  --color-border: var(--border);
+  --color-border-bright: var(--border-bright);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-muted: var(--muted);
+
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-confirmed: var(--status-confirmed);
+  --color-status-confirmed-bg: var(--status-confirmed-bg);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
+  --color-status-expired: var(--status-expired);
+  --color-status-expired-bg: var(--status-expired-bg);
+  --color-status-refunded: var(--status-refunded);
+  --color-status-refunded-bg: var(--status-refunded-bg);
+
+  /* === RADIUS === */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+@layer base {
+  :root {
+    /* Cinematic Obsidian — Dark Always */
+    --background: #121317;
+    --foreground: #e3e2e8;
+
+    /* Marquee Vermilion */
+    --primary: #ff4425;
+    --primary-hover: #ff5a36;
+    --primary-foreground: #ffffff;
+    --primary-glow: rgba(255, 68, 37, 0.35);
+
+    /* Champagne Gold — ratings, VIP, formats */
+    --gold: #e5b869;
+    --gold-dim: #c49a44;
+
+    /* Surface Elevation System */
+    --surface-dim: #0d0e12;           /* Floor Canvas */
+    --surface: #15161b;               /* Level 1 — cards, modules */
+    --surface-elevated: #1d1e24;      /* Level 2 — dropdowns, dialogs */
+    --surface-hover: rgba(255, 255, 255, 0.04);
+    --surface-foreground: #e3e2e8;
+
+    /* Structural borders */
+    --border: #282a33;                 /* Hairline 100% opacity */
+    --border-bright: rgba(255, 255, 255, 0.16); /* Hover state */
+    --input: #15161b;
+    --ring: #ff4425;
+    --muted: #64748b;
+
+    /* Status Colors — always paired with shape indicator */
+    --status-confirmed: #10b981;
+    --status-confirmed-bg: rgba(16, 185, 129, 0.1);
+    --status-pending: #f59e0b;
+    --status-pending-bg: rgba(245, 158, 11, 0.1);
+    --status-cancelled: #ef4444;
+    --status-cancelled-bg: rgba(239, 68, 68, 0.1);
+    --status-expired: #64748b;
+    --status-expired-bg: rgba(100, 116, 139, 0.1);
+    --status-refunded: #3b82f6;
+    --status-refunded-bg: rgba(59, 130, 246, 0.1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border box-border;
+  }
+
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "Google Sans", ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body[data-scroll-locked] main {
+    overflow: hidden !important;
+  }
+
+  /* Tabular numerics for data-dense areas */
+  .tabular-nums {
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Elms Sans display utility */
+  .font-display {
+    font-family: "Elms Sans", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: 0.03em;
+  }
+
+  /* Hide scrollbar but allow scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Thin styled scrollbar for data tables */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #282a33 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #282a33;
+    border-radius: 2px;
+  }
+
+  /* Seat node utility shapes */
+  .seat-regular {
+    border-radius: 6px 6px 3px 3px;
+  }
+  .seat-premium {
+    border-radius: 8px;
+  }
+  .seat-recliner {
+    border-radius: 9999px;
+  }
+
+  /* Cinematic gradient scrims */
+  .scrim-bottom {
+    background: linear-gradient(to top, #121317 0%, rgba(18, 19, 23, 0.7) 50%, transparent 100%);
+  }
+  .scrim-left {
+    background: linear-gradient(to right, #121317 0%, rgba(18, 19, 23, 0.6) 40%, transparent 100%);
+  }
+  .scrim-card {
+    background: linear-gradient(to top, rgba(13, 14, 18, 0.97) 0%, rgba(13, 14, 18, 0.5) 50%, transparent 100%);
+  }
+
+  /* Capacity bar colors */
+  .capacity-high {
+    background: linear-gradient(to right, #10b981, #10b981);
+  }
+  .capacity-mid {
+    background: linear-gradient(to right, #f59e0b, #f59e0b);
+  }
+  .capacity-critical {
+    background: linear-gradient(to right, #ef4444, #ef4444);
+  }
+
+  /* Primary glow effect */
+  .glow-primary {
+    box-shadow: 0 0 20px 2px rgba(255, 68, 37, 0.35);
+  }
+  .glow-primary-sm {
+    box-shadow: 0 0 12px rgba(255, 68, 37, 0.6);
+  }
+
+  /* Level 2 surface shadow */
+  .shadow-elevated {
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
+  }
+  .shadow-modal {
+    box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  }
+
+  /* Card interactive hover */
+  .card-hover {
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}

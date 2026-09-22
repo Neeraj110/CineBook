@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              BigInt      @id @default(autoincrement())
+  name            String      @db.VarChar(100)
+  email           String      @unique @db.VarChar(255)
+  passwordHash    String      @map("password_hash")
+  role            String      @default("user") @db.VarChar(20)
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings        Booking[]
+  lockedShowSeats ShowSeat[]  @relation("SeatLockUser")
+  @@map("users")
+} 
+
+model Movie {
+  id              BigInt    @id @default(autoincrement())
+  title           String    @db.VarChar(255)
+  description     String?
+  durationMinutes Int       @map("duration_minutes")
+  releaseDate     DateTime? @map("release_date") @db.Date
+  language        String?   @db.VarChar(50)
+  genre           String?   @db.VarChar(100)
+  posterUrl       String?   @map("poster_url")
+  bannerUrl       String?   @map("banner_url")
+  trailerUrl      String?   @map("trailer_url")
+  certification   String?   @db.VarChar(10)
+  rating          Decimal?  @default(0.0) @db.Decimal(3, 1)
+  isReleased      Boolean?  @default(true) @map("is_released")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  shows           Show[]
+  @@index([releaseDate])
+  @@map("movies")
+}
+
+model Theatre {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @db.VarChar(150)
+  address   String
+  city      String   @db.VarChar(100)
+  latitude  Decimal? @db.Decimal(10, 7)
+  longitude Decimal? @db.Decimal(10, 7)
+  landmark  String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  screens   Screen[]
+  @@map("theatres")
+}
+
+model Screen {
+  id         BigInt   @id @default(autoincrement())
+  theatreId  BigInt   @map("theatre_id")
+  name       String   @db.VarChar(100)
+  screenType String?  @default("2D") @map("screen_type") @db.VarChar(50)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  theatre    Theatre  @relation(fields: [theatreId], references: [id], onDelete: Cascade)
+  seats      Seat[]
+  shows      Show[]
+  @@unique([theatreId, name])
+  @@index([theatreId])
+  @@map("screens")
+}
+
+model Seat {
+  id           BigInt      @id @default(autoincrement())
+  screenId     BigInt      @map("screen_id")
+  seatNumber   String      @map("seat_number") @db.VarChar(20)
+  rowLabel     String      @default("A") @map("row_label") @db.VarChar(5)
+  colNumber    Int         @default(1) @map("col_number")
+  isWheelchair Boolean?    @default(false) @map("is_wheelchair")
+  seatType     String      @default("regular") @map("seat_type") @db.VarChar(20)
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  screen       Screen      @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  showSeats    ShowSeat[]
+  @@unique([screenId, seatNumber])
+  @@unique([screenId, rowLabel, colNumber])
+  @@index([screenId, rowLabel, colNumber])
+  @@map("seats")
+}
+
+model Show {
+  id           BigInt      @id @default(autoincrement())
+  movieId      BigInt      @map("movie_id")
+  screenId     BigInt      @map("screen_id")
+  startTime    DateTime    @map("start_time") @db.Timestamptz(6)
+  endTime      DateTime    @map("end_time") @db.Timestamptz(6)
+  ticketPrice  Decimal     @map("ticket_price") @db.Decimal(10, 2)
+  format       String?     @default("2D") @db.VarChar(20)
+  language     String?     @default("Hindi") @db.VarChar(50)
+  hasSubtitles Boolean?    @default(false) @map("has_subtitles")
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  movie        Movie       @relation(fields: [movieId], references: [id], onDelete: Restrict)
+  screen       Screen      @relation(fields: [screenId], references: [id], onDelete: Restrict)
+  showSeats    ShowSeat[]
+  bookings     Booking[]
+  @@index([movieId, startTime])
+  @@index([screenId, startTime])
+  @@index([startTime])
+  @@map("shows")
+}
+
+model ShowSeat {
+  id             BigInt        @id @default(autoincrement())
+  showId         BigInt        @map("show_id")
+  seatId         BigInt        @map("seat_id")
+  status         String        @default("available") @db.VarChar(20)
+  price          Decimal       @db.Decimal(10, 2)
+  lockedUntil    DateTime?     @map("locked_until") @db.Timestamptz(6)
+  lockedByUserId BigInt?       @map("locked_by_user_id")
+  show           Show          @relation(fields: [showId], references: [id], onDelete: Cascade)
+  seat           Seat          @relation(fields: [seatId], references: [id], onDelete: Restrict)
+  lockedByUser   User?         @relation("SeatLockUser", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  bookingSeats   BookingSeat[]
+  @@unique([showId, seatId])
+  @@index([showId, status, lockedUntil, id])
+  @@index([lockedUntil])
+  @@map("show_seats")
+}
+
+model Booking {
+  id          BigInt        @id @default(autoincrement())
+  userId      BigInt        @map("user_id")
+  showId      BigInt        @map("show_id")
+  status      String        @default("pending") @db.VarChar(20)
+  totalAmount Decimal       @map("total_amount") @db.Decimal(10, 2)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  show        Show          @relation(fields: [showId], references: [id], onDelete: Restrict)
+  seats       BookingSeat[]
+  payment     Payment?
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([showId])
+  @@map("bookings")
+}
+
+model BookingSeat {
+  id         BigInt   @id @default(autoincrement())
+  bookingId  BigInt   @map("booking_id")
+  showSeatId BigInt   @map("show_seat_id")
+  price      Decimal  @db.Decimal(10, 2)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  showSeat   ShowSeat @relation(fields: [showSeatId], references: [id], onDelete: Restrict)
+  @@unique([bookingId, showSeatId])
+  @@index([showSeatId])
+  @@index([bookingId])
+  @@map("booking_seats")
+}
+
+model Payment {
+  id            BigInt   @id @default(autoincrement())
+  bookingId     BigInt   @unique @map("booking_id")
+  amount        Decimal  @db.Decimal(10, 2)
+  status        String   @default("pending") @db.VarChar(20)
+  paymentMethod String?  @map("payment_method") @db.VarChar(30)
+  transactionId String?  @unique @map("transaction_id") @db.VarChar(255)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  @@map("payments")
+}

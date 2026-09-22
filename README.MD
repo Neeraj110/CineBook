@@ -125,6 +125,27 @@ NEXT_PUBLIC_API_URL="http://localhost:5000/api"
 - The Google callback URL must exactly match the authorized redirect URI in Google Cloud Console.
 - The backend defaults to port `5000`; the frontend defaults to port `3000`.
 
+For production, set the variables in the hosting dashboards rather than using
+the local `.env` values.
+
+Backend on Render:
+
+```env
+FRONTEND_URL=https://cine-book-steel.vercel.app
+GOOGLE_CALLBACK_URL=https://cinebook-i8er.onrender.com/api/auth/callback/google
+```
+
+Frontend on Vercel:
+
+```env
+NEXT_PUBLIC_API_URL=https://cinebook-i8er.onrender.com/api
+```
+
+`FRONTEND_URL` must use `https://` and exactly match the browser origin. After
+changing Render variables, redeploy or restart the backend. After changing
+Vercel variables, create a new deployment because Next.js embeds
+`NEXT_PUBLIC_*` values at build time.
+
 ## Database and Prisma
 
 The Prisma schema is located at `backend/prisma/schema.prisma`. Prisma reads the database URL from `DATABASE_URL` through `backend/prisma.config.ts` and `backend/config/prisma.ts`.

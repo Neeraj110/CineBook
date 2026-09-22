@@ -1,6 +1,12 @@
 import { useAuthStore } from "../store/useAuthStore";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
+
+export const API_BASE_URL = configuredApiUrl
+  ? configuredApiUrl.endsWith("/api")
+    ? configuredApiUrl
+    : `${configuredApiUrl}/api`
+  : "http://localhost:5000/api";
 
 export class ApiError extends Error {
   public status: number;
